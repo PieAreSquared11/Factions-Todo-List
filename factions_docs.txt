@@ -1,0 +1,21 @@
+factions.version is a variable made to check the version of the playerfactions mod to assert compatibility:
+factions.version == nil for firsts version of playerfactions mod
+factions.version == 2 is the first time this variable is added, with adding multi-faction mode
+factions.player_is_in_faction(fname, player_name): true if the player is in the faction, nil in other cases (faction or player doesn't exists or player is not a member of the faction)
+factions.get_facts(): Get a copied table with all data. The structure is :
+{["name_of_faction1"]={
+      ["owner"]=name_of_the_owner,
+      ["members"]={["name_of_a_member1"]=true, ["name_of_a_member2"]=true}
+  }}
+factions.get_player_faction(player): Get a string with the faction a player belongs to, nil if they haven't joined a faction. In multi-faction mode, it will return the oldest created faction which player is into. (it's not necessarily the one they joined first. It checks the facts variable from the top)
+factions.get_player_factions(player): Get a table with the faction(s) a player belongs to, nil if they haven't joined a faction. The structure is: {name_of_faction1, name_of_faction2}
+factions.get_owned_factions(player): Get a table with the faction(s) owned by a player, nil if they have the ownership of no faction. The structure is: {name_of_faction1, name_of_faction2}
+factions.get_owner(faction): Get the owner of a faction
+factions.chown(fname, owner): Change the owner of a faction
+factions.register_faction(faction, player, password): Create a new faction
+factions.disband_faction(faction): Disband a faction
+factions.get_password(faction): Gets a faction's password
+factions.set_password(faction, password): Sets a faction's password
+factions.join_faction(faction, player): Sets the given player as belonging to this faction
+factions.leave_faction(faction, player): Remove the given player from the specified faction
+Note that all of these functions have sanity checks : if faction or player does not exists, it return false. If operation succeed, it return true or the needed value.
