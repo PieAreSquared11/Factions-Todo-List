@@ -22,6 +22,15 @@ function todo.clear(faction)
     storage:set_string("items", minetest.serialize(items))
 end
 
+-- Add remove helper function to todo table
+function todo.remove(faction, index)
+    local list = todo.get(faction)
+    if index >= 1 and index <= #list then
+        table.remove(list, index)  -- No need for +1 since we're using 1-based indexing
+        todo.lists[faction] = list
+    end
+end
+
 ChatCmdBuilder.new("f_todo", function (cmd)
     cmd:sub("add :item", function (name, item)
         local faction = factions.get_player_faction(name)
@@ -85,4 +94,38 @@ ChatCmdBuilder.new("f_todo", function (cmd)
         
         factions.notify_player(name, "Todo list cleared for faction " .. faction)
     end)
-end)
+
+    cmd:sub("remove :number", function(name, index)
+        local faction = factions.get_player_faction(name)
+        if not faction then
+            factions.notify_player(name, "You are not a member of any faction")
+            return
+        end
+
+        -- Check if player is the faction owner for removing items
+        if not factions.player_is_owner(name, faction) then
+            factions.notify_player(name, "Only the faction owner can remove todo items")
+            return
+        end
+
+        local todo_list = todo.get(faction)
+        if index < 1 or index > #todo_list then
+            factions.notify_player(name, "Invalid todo item index")
+            return
+        end
+        
+        local removed_item = todo_list[index]
+        todo.remove(faction, index)
+        todo.save()
+        
+        factions.notify_player(name, "Removed todo item: " .. removed_item)
+    end)
+end, {
+    description = [[Faction Todo List Commands:
+/f_todo list - Show your faction's todo list
+/f_todo add <item> - Add an item to your faction's todo list (owner only)
+/f_todo remove <index> - Remove an item by its number from your faction's todo list (owner only)
+/f_todo clear - Clear all items from your faction's todo list (owner only)
+
+Note: Item numbers in the list start from 1]]
+})
