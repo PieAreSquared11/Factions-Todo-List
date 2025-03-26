@@ -27,21 +27,21 @@ function todo.remove(faction, index)
     local list = todo.get(faction)
     if index >= 1 and index <= #list then
         table.remove(list, index)  -- No need for +1 since we're using 1-based indexing
-        todo.lists[faction] = list
+        todo[faction] = list
     end
 end
 
 ChatCmdBuilder.new("f_todo", function (cmd)
-    cmd:sub("add :item", function (name, item)
+    cmd:sub("add :item:text", function (name, item)
         local faction = factions.get_player_faction(name)
         if not faction then
-            factions.notify_player(name, "You are not a member of any faction")
+            minetest.chat_send_player(name, "You are not a member of any faction")
             return
         end
 
         -- Check if player is the faction owner for adding items
         if not factions.player_is_owner(name, faction) then
-            factions.notify_player(name, "Only the faction owner can add todo items")
+            minetest.chat_send_player(name, "Only the faction owner can add todo items")
             return
         end
         
@@ -53,19 +53,19 @@ ChatCmdBuilder.new("f_todo", function (cmd)
         for _, task in ipairs(todo_list) do
             message = message .. "- " .. task .. "\n"
         end
-        factions.notify_player(name, message)
+        minetest.chat_send_player(name, message)
     end)
 
     cmd:sub("list", function(name)
         local faction = factions.get_player_faction(name)
         if not faction then
-            factions.notify_player(name, "You are not a member of any faction")
+            minetest.chat_send_player(name, "You are not a member of any faction")
             return
         end
 
         local todo_list = todo.get(faction)
         if #todo_list == 0 then
-            factions.notify_player(name, "Todo list for " .. faction .. " is empty")
+            minetest.chat_send_player(name, "Todo list for " .. faction .. " is empty")
             return
         end
         
@@ -73,44 +73,44 @@ ChatCmdBuilder.new("f_todo", function (cmd)
         for _, task in ipairs(todo_list) do
             message = message .. "- " .. task .. "\n"
         end
-        factions.notify_player(name, message)
+        minetest.chat_send_player(name, message)
     end)
 
     cmd:sub("clear", function(name)
         local faction = factions.get_player_faction(name)
         if not faction then
-            factions.notify_player(name, "You are not a member of any faction")
+            minetest.chat_send_player(name, "You are not a member of any faction")
             return
         end
 
         -- Check if player is the faction owner for clearing items
         if not factions.player_is_owner(name, faction) then
-            factions.notify_player(name, "Only the faction owner can clear todo items")
+            minetest.chat_send_player(name, "Only the faction owner can clear todo items")
             return
         end
         
         todo.clear(faction)
         todo.save()
         
-        factions.notify_player(name, "Todo list cleared for faction " .. faction)
+        minetest.chat_send_player(name, "Todo list cleared for faction " .. faction)
     end)
 
-    cmd:sub("remove :number", function(name, index)
+    cmd:sub("remove :number:int", function(name, index)
         local faction = factions.get_player_faction(name)
         if not faction then
-            factions.notify_player(name, "You are not a member of any faction")
+            minetest.chat_send_player(name, "You are not a member of any faction")
             return
         end
 
         -- Check if player is the faction owner for removing items
         if not factions.player_is_owner(name, faction) then
-            factions.notify_player(name, "Only the faction owner can remove todo items")
+            minetest.chat_send_player(name, "Only the faction owner can remove todo items")
             return
         end
 
         local todo_list = todo.get(faction)
         if index < 1 or index > #todo_list then
-            factions.notify_player(name, "Invalid todo item index")
+            minetest.chat_send_player(name, "Invalid todo item index")
             return
         end
         
@@ -118,7 +118,7 @@ ChatCmdBuilder.new("f_todo", function (cmd)
         todo.remove(faction, index)
         todo.save()
         
-        factions.notify_player(name, "Removed todo item: " .. removed_item)
+        minetest.chat_send_player(name, "Removed todo item: " .. removed_item)
     end)
 end, {
     description = [[Faction Todo List Commands:
